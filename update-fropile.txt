@@ -1,0 +1,104 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
+import { ApiService } from '../../../../core/services'
+import { tap, finalize, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { UpdateProfileService } from '../../services'
+@Component({
+  selector: 'app-update-profile',
+  templateUrl: './update-profile.component.html',
+  styleUrls: ['./update-profile.component.css']
+})
+export class UpdateProfileComponent implements OnInit {
+  profileupdateForm: FormGroup;
+  submitted: boolean = false;
+  isLoading: boolean = false;
+  message: any;
+  url: any; 
+  error: any;
+  userinfo: any;
+  alertMsg: { "class": string; "text": any; "info": string; };
+;
+  
+
+  constructor(private formBuilder: FormBuilder, private _sanitizer: DomSanitizer, private apiService: ApiService, private updateprofileService : UpdateProfileService) {
+    this.profileupdateForm = this.formBuilder.group({
+      name: ["", [Validators.required]],
+      email: ["", [Validators.required, Validators.email]],
+      image: [""],
+      user_id: localStorage.getItem('user_Id')
+    })
+  }
+
+  ngOnInit() {
+    //this.url = 'assets/Images/Myprofile/Profile.png';
+    this.getUserDetails()
+  }
+
+  get f() {
+    return this.profileupdateForm.controls;
+  }
+
+  getUserDetails(){
+    let userId = localStorage.getItem('user_Id')
+    this.updateprofileService.myprofileApi(userId).pipe(
+      tap(response =>{
+         this.userinfo = response.data;
+         this.url = response.data.image;
+      }),
+    finalize(() => this.isLoading = false),
+    catchError(error => of(this.error = error))
+    ).subscribe();
+  }
+
+  updateprofile() {
+    this.submitted = true;
+    if (this.profileupdateForm.invalid) {
+      return;
+    }
+    this.updateprofileService.updateprofileApi(this.profileupdateForm.value).pipe(
+      tap(response => {
+        if (response.status == "success" || response.status == "failure") {
+          this.alertMsg = {
+            "class": 'received',
+            "text": response.response.message,
+            "info": 'Success',
+          };
+        }
+      }),
+      finalize(() => this.isLoading = false),
+      catchError(error => of(this.error))
+    ).subscribe();
+  } 
+
+  callError(error) {
+    this.alertMsg = {
+      "class": 'received',
+      "text": this.message,
+      "info": 'Alert',
+      // "colorClass": "message-danger"
+    };
+  }
+
+
+  onSelectFile(event) {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      this.profileupdateForm.get('image').setValue(formData);
+      this.profileupdateForm.get('user_id').setValue(localStorage.getItem('user_Id'));
+      var reader = new FileReader();
+      reader.readAsDataURL(event.target.files[0]);
+      reader.onload = (event: any) => {
+        this.url = event.target.result;
+      }
+    }
+  }
+
+  sanitizeImage(image: string) {
+    return this._sanitizer.bypassSecurityTrustStyle(`url(${image})`);
+  } 
+
+}
