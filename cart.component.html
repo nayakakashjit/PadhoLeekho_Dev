@@ -1,0 +1,75 @@
+<div class="container-fluid">
+    <div class="Cart-section">
+        <div *ngIf="cartList && cartList.length > 0" class="row">
+            <div class="col-xl-3">
+                <img src="assets/Images/Cart/Cart.png" class="img-fluid mx-auto mob-hide d-block" alt="Padholeekho Cart">
+            </div>
+
+            <div class="col-xl-9">
+                <div class="Cart-table">
+                    <table class="table table-xs">
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-left">Topic</th>
+                            <th class="text-center">Price</th>
+                            <th class="text-center">Discount</th>
+                            <th class="text-center">Final Price</th>
+                            <th class="text-center">Move To Wishlist</th>
+                            <th class="text-center">Remove</th>
+                        </tr>
+                        <tr *ngFor="let item of cartList" class="item-row">
+                            <td class="text-left">
+                                <img src="{{item.image}}" class="img-fluid" alt="Padholeekho Cart">
+                            </td>
+                            <td class="text-left">
+                                <p>{{item.title}}</p>
+                            </td>
+                            <td class="text-center" title="Price"> {{item.actual_price | currency: "INR"}} </td>
+                            <td class="text-center" title="Offer Price"> {{item.discount_price | currency: "INR"}} </td>
+                            <td class="text-center" title="Final Price"> {{item.final_price | currency: "INR"}} </td>
+                            <td class="text-center" title="Move To Wishlist"><i (click)="movetoWishlist(item.cart_id)" class="far fa-heart"></i></td>
+                            <td class="text-center" title="Remove"><i (click)="removeCart(item.cart_id)" class="fas fa-trash-alt remove-product"></i></td>
+                        </tr>
+                    </table>
+                    <div class="row">
+                        <div class="col-6">
+                            <button type="button" (click)="contShoping()" class="btn btn-success cont-shoping ripple"><i class="fas fa-arrow-circle-left"></i> Continue Shoping</button>
+                        </div>
+                        <div class="col-6">
+                            <div *ngIf="cartList">
+                                <p class="sub-total">SUB TOTAL <span class="float-right"> {{getActualPrice() | currency : "INR"}} </span></p>
+                                <p class="sub-total">DISCOUNT <span class="float-right"> {{getDiscountPrice() | currency : "INR"}} </span></p>
+                                <p class="sub-total">TOTAL PAYABLE <span class="float-right"> {{getFinalPrice() | currency : "INR"}}</span></p>
+                                <div class="float-right move-cart">
+                                    <button type="button" (click)="checkOut(getActualPrice(), getDiscountPrice(), getFinalPrice())" class="btn btn-success cont-shoping ripple">Check Out <i class="fas fa-arrow-circle-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="cartList && cartList.length == 0" class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>My Cart</h5>
+                        <img src="assets/Images/Cart/Cart_Empty.png" class="img-fluid mx-auto d-block" alt="Padholeekho Cart_Empty">
+                        <h5 class="text-center">Your cart is empty!</h5>
+                    </div>
+                </div>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form #paymentform id="nonseamless" method="post" name="redirect" action="https://test.ccavenue.com/transaction/transaction.do?command=initiateTransaction"> 
+        <input type="hidden" id="encRequest" name="encRequest" value="63957FB55DD6E7B968A7588763E08B240878046EF2F520C44BBC63FB9CCE726209A4734877F5904445591304ABB2F5E598B951E39EAFB9A24584B00590ADB077ADE5E8C444EAC5A250B1EA96F68D22E44EA2515401C2CD753DBA91BD0E7DFE7341BE1E7B7550&access_code=8JXENNSSBEZCU8KQ&command=confirmOrder&request_type=XML&response_type=XML&version=1.1">
+        <input type="hidden" name="access_code" id="access_code" value="AVJX89GL19AJ19XJJA">
+</form>
+
+<app-download></app-download>
+<app-testimonial></app-testimonial>
+<app-isloading *ngIf="isLoading"></app-isloading>
+<app-alert [alertMsg]="alertMsg"></app-alert>
